@@ -3,70 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Myフィットネスレコーダー</title>
+    <title>My Fitness Recorder</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* より洗練されたフォントと背景の空気感のための微調整 */
+        body { background-color: #f8fafc; }
+    </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans min-h-screen pb-12">
+<body class="text-slate-800 font-sans min-h-screen pb-12 antialiased">
 
-    <header class="bg-blue-600 text-white shadow-md p-4 mb-6">
-        <div class="max-w-4xl mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-bold tracking-wider">🏋️‍♂️ Myフィットネスレコーダー</h1>
-            <span class="text-sm bg-blue-700 px-3 py-1 rounded-full">モチベーションUP版</span>
+    <header class="bg-white/80 backdrop-blur-md border-b border-slate-100 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2">
+                <span class="text-2xl">🏋️‍♂️</span> My Fitness Recorder
+            </h1>
         </div>
     </header>
 
-    <main class="max-w-4xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-6">
+    <main class="max-w-4xl mx-auto px-4 mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
         
         <div class="space-y-6">
             
-            <section class="bg-gradient-to-br from-amber-500 to-orange-600 text-white p-5 rounded-xl shadow-md">
-                <h2 class="text-xs font-bold uppercase tracking-wider opacity-80 mb-2">トレーニング継続ステータス</h2>
+            <section class="bg-gradient-to-tr from-cyan-500 to-emerald-500 text-white p-6 rounded-2xl shadow-sm shadow-emerald-100">
+                <h2 class="text-[11px] font-bold uppercase tracking-wider opacity-90 mb-3">ACTIVITY STREAK</h2>
                 <div class="flex justify-around items-center text-center">
                     <div>
-                        <span class="block text-xs opacity-90">現在の連続</span>
-                        <span class="text-3xl font-black" id="currentStreak">0</span><span class="text-xs font-bold"> 日連続</span>
+                        <span class="block text-xs opacity-85 mb-1">現在の連続</span>
+                        <span class="text-3xl font-black tracking-tight" id="currentStreak">0</span><span class="text-xs font-semibold opacity-90"> 日</span>
                     </div>
-                    <div class="border-l border-white/20 h-8"></div>
+                    <div class="border-l border-white/20 h-10"></div>
                     <div>
-                        <span class="block text-xs opacity-90">過去最高</span>
-                        <span class="text-3xl font-black" id="maxStreak">0</span><span class="text-xs font-bold"> 日</span>
+                        <span class="block text-xs opacity-85 mb-1">過去最高</span>
+                        <span class="text-3xl font-black tracking-tight" id="maxStreak">0</span><span class="text-xs font-semibold opacity-90"> 日</span>
                     </div>
                 </div>
-                <div class="mt-3 text-center text-[11px] bg-white/10 py-1 rounded-lg" id="streakMessage">
+                <div class="mt-4 text-center text-xs bg-white/15 py-1.5 px-2 rounded-xl font-medium backdrop-blur-sm" id="streakMessage">
                     今日もお疲れ様です！記録をつけましょう！
                 </div>
             </section>
 
-            <section class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                <h2 class="text-lg font-bold mb-4 text-slate-700 border-b pb-2">今日の記録</h2>
+            <section class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm shadow-slate-100/50">
+                <h2 class="text-base font-bold mb-4 text-slate-800 flex items-center gap-1.5">
+                    <span class="w-1 h-4 bg-cyan-500 rounded-full"></span>今日の記録
+                </h2>
                 <form id="logForm" class="space-y-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 mb-1">日付</label>
-                        <input type="date" id="dateInput" required class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">日付</label>
+                        <input type="date" id="dateInput" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:bg-white focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none transition">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 mb-1">腕立て伏せ (回)</label>
-                        <input type="number" id="pushupsInput" min="0" placeholder="0" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">腕立て伏せ (回)</label>
+                        <input type="number" id="pushupsInput" min="0" placeholder="0" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:bg-white focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none transition">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-500 mb-1">有酸素運動 (分)</label>
-                        <input type="number" id="cardioInput" min="0" placeholder="0" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">有酸素運動 (分)</label>
+                        <input type="number" id="cardioInput" min="0" placeholder="0" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:bg-white focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none transition">
                     </div>
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition duration-200 shadow-md">
+                    <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl transition duration-200 shadow-sm tracking-wide text-sm mt-2">
                         記録を保存する
                     </button>
                 </form>
             </section>
 
-            <section class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                <h2 class="text-sm font-bold mb-3 text-slate-700 border-b pb-2">iPhoneへのテキスト保存</h2>
-                <div class="grid grid-cols-1 gap-2">
-                    <button onclick="exportToText()" class="w-full bg-slate-700 hover:bg-slate-800 text-white text-xs font-bold py-2.5 rounded-lg transition shadow-sm text-center">
-                        📥 データをテキストで保存
+            <section class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm shadow-slate-100/50">
+                <h2 class="text-xs font-bold mb-3 text-slate-400 uppercase tracking-wider">Data Backup</h2>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="exportToText()" class="bg-slate-50 hover:bg-slate-100 text-slate-600 text-xs font-semibold py-2.5 rounded-xl transition border border-slate-200/60 text-center">
+                        📥 テキスト保存
                     </button>
-                    <label class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold py-2.5 rounded-lg transition shadow-sm text-center cursor-pointer border border-slate-300 block">
-                        📤 テキストからデータを復元
+                    <label class="bg-slate-50 hover:bg-slate-100 text-slate-600 text-xs font-semibold py-2.5 rounded-xl transition border border-slate-200/60 text-center cursor-pointer block">
+                        📤 データ復元
                         <input type="file" id="importFile" accept=".txt" class="hidden" onchange="importFromText(event)">
                     </label>
                 </div>
@@ -74,26 +81,31 @@
         </div>
 
         <section class="md:col-span-2 space-y-6">
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                <h2 class="text-lg font-bold mb-4 text-slate-700">トレーニングの推移</h2>
+            <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm shadow-slate-100/50">
+                <h2 class="text-base font-bold mb-4 text-slate-800 flex items-center gap-1.5">
+                    <span class="w-1 h-4 bg-cyan-500 rounded-full"></span>トレーニングの推移
+                </h2>
                 <div class="relative w-full h-64">
                     <canvas id="workoutChart"></canvas>
                 </div>
             </div>
 
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                <h2 class="text-lg font-bold mb-3 text-slate-700">過去の履歴</h2>
-                <div class="overflow-x-auto max-h-60 overflow-y-auto">
+            <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm shadow-slate-100/50">
+                <h2 class="text-base font-bold mb-3 text-slate-800 flex items-center gap-1.5">
+                    <span class="w-1 h-4 bg-cyan-500 rounded-full"></span>過去の履歴
+                </h2>
+                <div class="overflow-x-auto max-h-60 overflow-y-auto rounded-xl border border-slate-100">
                     <table class="w-full text-left text-sm text-slate-600">
-                        <thead class="bg-slate-100 text-xs text-slate-700 uppercase sticky top-0">
+                        <thead class="bg-slate-50 text-xs text-slate-400 uppercase sticky top-0 border-b border-slate-100">
                             <tr>
-                                <th class="p-3">日付</th>
-                                <th class="p-3">腕立て (回)</th>
-                                <th class="p-3">有酸素 (分)</th>
-                                <th class="p-3 text-center">操作</th>
+                                <th class="p-3.5 font-semibold">日付</th>
+                                <th class="p-3.5 font-semibold">腕立て (回)</th>
+                                <th class="p-3.5 font-semibold">有酸素 (分)</th>
+                                <th class="p-3.5 font-semibold text-center">操作</th>
                             </tr>
                         </thead>
-                        <tbody id="historyTableBody"></tbody>
+                        <tbody id="historyTableBody" class="divide-y divide-slate-50">
+                            </tbody>
                     </table>
                 </div>
             </div>
@@ -104,7 +116,6 @@
         let db = JSON.parse(localStorage.getItem('workoutLogs')) || [];
         let myChart = null;
 
-        // 日本時間の正確な日付文字列を取得する補助関数 (YYYY-MM-DD)
         function formatDate(date) {
             const y = date.getFullYear();
             const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -113,7 +124,6 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            // 今日の日付を自動セット
             document.getElementById('dateInput').value = formatDate(new Date());
             renderAll();
         });
@@ -157,7 +167,6 @@
             renderChart();
         }
 
-        // 【新機能】連続日数の計算ロジック
         function renderStreaks() {
             if (db.length === 0) {
                 document.getElementById('currentStreak').innerText = '0';
@@ -166,15 +175,12 @@
                 return;
             }
 
-            // 重複排除して日付順にソート
             const dates = [...new Set(db.map(item => item.date))].sort();
-            
             const todayStr = formatDate(new Date());
             const yesterdayObj = new Date();
             yesterdayObj.setDate(yesterdayObj.getDate() - 1);
             const yesterdayStr = formatDate(yesterdayObj);
 
-            // 1. 過去最高記録の計算
             let maxStreak = 0;
             let currentTemp = 0;
             let prevDateObj = null;
@@ -197,36 +203,32 @@
             }
             if (currentTemp > maxStreak) maxStreak = currentTemp;
 
-            // 2. 現在の連続記録の計算
             let currentStreak = 0;
             const lastDateStr = dates[dates.length - 1];
 
-            // 最後の記録が「今日」または「昨日」の場合のみカウントする
             if (lastDateStr === todayStr || lastDateStr === yesterdayStr) {
                 let checkObj = new Date(lastDateStr);
                 while (true) {
                     const checkStr = formatDate(checkObj);
                     if (dates.includes(checkStr)) {
                         currentStreak++;
-                        checkObj.setDate(checkObj.getDate() - 1); // 1日前へ
+                        checkObj.setDate(checkObj.getDate() - 1);
                     } else {
                         break;
                     }
                 }
             }
 
-            // 画面に数値を反映
             document.getElementById('currentStreak').innerText = currentStreak;
             document.getElementById('maxStreak').innerText = maxStreak;
 
-            // メッセージの切り替え
             const msgArea = document.getElementById('streakMessage');
             if (lastDateStr === todayStr) {
-                msgArea.innerText = `🔥 今日の分の記録完了！現在 ${currentStreak}日連続！`;
+                msgArea.innerText = `✨ 今日の記録完了！現在 ${currentStreak}日連続です`;
             } else if (lastDateStr === yesterdayStr) {
-                msgArea.innerText = `⚠️ 昨日は継続中！今日の記録を忘れないで！`;
+                msgArea.innerText = `⚡️ 昨日まで継続中！今日の記録もお待ちしています`;
             } else {
-                msgArea.innerText = `継続が途切れてしまいました。今日から再スタート！`;
+                msgArea.innerText = `今日からまた新しいスタートを切りましょう！`;
             }
         }
 
@@ -235,13 +237,13 @@
             tbody.innerHTML = '';
             [...db].reverse().forEach(item => {
                 const tr = document.createElement('tr');
-                tr.className = 'border-b hover:bg-slate-50';
+                tr.className = 'hover:bg-slate-50/80 transition-colors';
                 tr.innerHTML = `
-                    <td class="p-3 font-medium">${item.date}</td>
-                    <td class="p-3 text-blue-600 font-bold">${item.pushups} 回</td>
-                    <td class="p-3 text-emerald-600 font-bold">${item.cardio} 分</td>
-                    <td class="p-3 text-center">
-                        <button onclick="deleteLog('${item.date}')" class="text-red-500 hover:text-red-700 text-xs font-bold px-2 py-1 rounded hover:bg-red-50">削除</button>
+                    <td class="p-3.5 font-medium text-slate-700">${item.date}</td>
+                    <td class="p-3.5 text-cyan-600 font-bold">${item.pushups} 回</td>
+                    <td class="p-3.5 text-emerald-600 font-bold">${item.cardio} 分</td>
+                    <td class="p-3.5 text-center">
+                        <button onclick="deleteLog('${item.date}')" class="text-slate-400 hover:text-red-500 text-xs font-semibold px-2 py-1 rounded-lg hover:bg-red-50 transition">削除</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -261,22 +263,26 @@
                 data: {
                     labels: labels,
                     datasets: [
-                        { label: '腕立て伏せ (回)', data: pushupsData, borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', yAxisID: 'yPushups', tension: 0.2, borderWidth: 3 },
-                        { label: '有酸素運動 (分)', data: cardioData, borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', yAxisID: 'yCardio', tension: 0.2, borderWidth: 3 }
+                        { label: '腕立て伏せ (回)', data: pushupsData, borderColor: '#0ea5e9', backgroundColor: 'rgba(14, 165, 233, 0.05)', yAxisID: 'yPushups', tension: 0.2, borderWidth: 3, fill: true },
+                        { label: '有酸素運動 (分)', data: cardioData, borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.05)', yAxisID: 'yCardio', tension: 0.2, borderWidth: 3, fill: true }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { boxWidth: 12, font: { size: 11, weight: 'bold' } } }
+                    },
                     scales: {
-                        x: { grid: { display: false } },
-                        yPushups: { type: 'linear', position: 'left', title: { display: true, text: '腕立て (回)' }, min: 0 },
-                        yCardio: { type: 'linear', position: 'right', title: { display: true, text: '有酸素 (分)' }, min: 0, grid: { drawOnChartArea: false } }
+                        x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+                        yPushups: { type: 'linear', position: 'left', title: { display: true, text: '腕立て (回)', font: { size: 10, weight: 'bold' } }, min: 0, ticks: { font: { size: 10 } } },
+                        yCardio: { type: 'linear', position: 'right', title: { display: true, text: '有酸素 (分)', font: { size: 10, weight: 'bold' } }, min: 0, grid: { drawOnChartArea: false }, ticks: { font: { size: 10 } } }
                     }
                 }
             });
         }
 
+        // バックアップ機能
         function exportToText() {
             if (db.length === 0) { alert('保存するデータがありません。'); return; }
             const dataStr = JSON.stringify(db, null, 2);
