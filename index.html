@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Myフィットネスレコーダー Pro</title>
+    <title>My Fitness Recorder</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -11,8 +11,8 @@
 
     <header class="bg-blue-600 text-white shadow-md p-4 mb-6">
         <div class="max-w-5xl mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-bold tracking-wider">🏋️‍♂️ Myフィットネスレコーダー</h1>
-            <span class="text-sm bg-blue-700 px-3 py-1 rounded-full">1年で10kg減量ターゲット</span>
+            <h1 class="text-xl font-bold tracking-wider">My Fitness Recorder</h1>
+            <span class="text-sm bg-blue-700 px-3 py-1 rounded-full">1年で10kg減量！</span>
         </div>
     </header>
 
@@ -30,6 +30,19 @@
             <div>
                 <p class="text-xs font-bold opacity-80">10kg達成までの進捗度</p>
                 <p class="text-2xl font-black mt-1" id="progressPercent">0.0 <span class="text-sm font-normal">%</span></p>
+            </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap gap-4 items-center justify-between text-sm">
+            <div class="text-slate-600 font-medium">📦 データのバックアップと読み込み</div>
+            <div class="flex items-center gap-3 flex-wrap">
+                <button onclick="exportData()" class="bg-slate-700 hover:bg-slate-800 text-white font-bold py-1.5 px-3 rounded-lg transition duration-150">
+                    📥 端末に保存 (JSON)
+                </button>
+                <label class="bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 font-bold py-1.5 px-3 rounded-lg cursor-pointer transition duration-150">
+                    📤 端末から読み込む
+                    <input type="file" id="importFile" accept=".json" class="hidden" onchange="importData(event)">
+                </label>
             </div>
         </div>
 
@@ -110,18 +123,29 @@
     </main>
 
     <script>
+        // --- データの初期読み込み (前のバージョンのデータも引き継ぎます) ---
         let db = JSON.parse(localStorage.getItem('workoutLogs')) || [];
         let myChart = null;
 
-        // カロリー計算ロジック
+        // ページ読み込み時に即座にデータを反映
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('dateInput').value = today;
+            
+            // 初回描画
+            renderAll();
+        });
+
+        // カロリー計算ロジック（前のバージョンデータ＝新項目がない場合もエラーにならないよう初期値を設定）
         function calculateSavings(item) {
             let savings = 0;
-            // 1. 晩酌コントロール（家飲みしなかったら+400kcalのおつまみ・酒代カット）
-            if (item.alcohol === 'none' || item.alcohol === 'social') {
+            
+            // 1. 晩酌コントロール（設定がない、またはnone, socialなら+400kcal）
+            if (!item.alcohol || item.alcohol === 'none' || item.alcohol === 'social') {
                 savings += 400;
             }
             // 2. 歩数（7000歩以上で追加消費約120kcal）
-            if (item.steps >= 7000) {
+            if (item.steps && item.steps >= 7000) {
                 savings += 120;
             }
             // 3. ピラティス（1回約200kcal）
@@ -135,12 +159,7 @@
             return savings;
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('dateInput').value = today;
-            renderAll();
-        });
-
+        // フォーム送信時の処理
         document.getElementById('logForm').addEventListener('submit', (e) => {
             e.preventDefault();
             
@@ -165,13 +184,14 @@
             saveData();
             renderAll();
 
-            // フォームクリア（日付・晩酌設定以外）
+            // フォームクリア
             document.getElementById('pushupsInput').value = '';
             document.getElementById('cardioInput').value = '';
             document.getElementById('stepsInput').value = '';
             document.getElementById('pilatesInput').checked = false;
         });
 
+        // データの削除
         function deleteLog(date) {
             if (confirm(`${date} の記録を削除しますか？`)) {
                 db = db.filter(item => item.date !== date);
@@ -180,17 +200,19 @@
             }
         }
 
+        // LocalStorageへの保存
         function saveData() {
             localStorage.setItem('workoutLogs', JSON.stringify(db));
         }
 
+        // 画面全体の更新
         function renderAll() {
             updateDashboard();
             renderTable();
             renderChart();
         }
 
-        // ダッシュボード（累計カロリー）の更新
+        // ダッシュボードの更新
         function updateDashboard() {
             let total = 0;
             db.forEach(item => {
@@ -199,12 +221,12 @@
             
             document.getElementById('totalSavings').innerHTML = `${total.toLocaleString()} <span class="text-sm font-normal">kcal</span>`;
             
-            // 進捗率（目標72000kcal）
             let percent = (total / 72000) * 100;
             if (percent > 100) percent = 100;
             document.getElementById('progressPercent').innerHTML = `${percent.toFixed(1)} <span class="text-sm font-normal">%</span>`;
         }
 
+        // 過去の履歴テーブル描画
         function renderTable() {
             const tbody = document.getElementById('historyTableBody');
             tbody.innerHTML = '';
@@ -213,18 +235,20 @@
                 const tr = document.createElement('tr');
                 tr.className = 'border-b hover:bg-slate-50';
 
-                // 晩酌の表示変換
+                // 前のバージョンのデータ（新項目がない場合）の表示補完
                 let alcoholText = '🍺 家飲み';
                 if (item.alcohol === 'none') alcoholText = '🔥 休肝日';
                 if (item.alcohol === 'social') alcoholText = '🤝 付き合い';
+                if (item.alcohol === undefined) alcoholText = 'ー'; // 前のバージョン用
 
+                const stepsText = item.steps !== undefined ? `${(item.steps).toLocaleString()}歩` : 'ー';
                 const savings = calculateSavings(item);
 
                 tr.innerHTML = `
                     <td class="p-3 font-medium text-xs md:text-sm">${item.date}</td>
                     <td class="p-3 text-xs">
                         <div>💪 腕立て: ${item.pushups || 0}回 / 🏃‍♂️ 有酸素: ${item.cardio || 0}分</div>
-                        <div class="text-slate-400 mt-0.5">🐾 歩数: ${(item.steps || 0).toLocaleString()}歩</div>
+                        <div class="text-slate-400 mt-0.5">🐾 歩数: ${stepsText}</div>
                     </td>
                     <td class="p-3 text-xs font-bold">${alcoholText}</td>
                     <td class="p-3 text-xs">${item.pilates ? '🧘 済' : 'ー'}</td>
@@ -237,12 +261,13 @@
             });
         }
 
+        // グラフの描画 (Chart.js)
         function renderChart() {
             const ctx = document.getElementById('workoutChart').getContext('2d');
             
             const labels = db.map(item => item.date);
             const cardioData = db.map(item => item.cardio);
-            const stepsData = db.map(item => item.steps);
+            const stepsData = db.map(item => item.steps || 0); // 旧データ用
 
             if (myChart) {
                 myChart.destroy();
@@ -270,7 +295,7 @@
                             yAxisID: 'ySteps',
                             tension: 0.2,
                             borderWidth: 3,
-                            type: 'bar' // 歩数はバー（棒グラフ）にして重ねると見やすくなります
+                            type: 'bar'
                         }
                     ]
                 },
@@ -295,6 +320,65 @@
                     }
                 }
             });
+        }
+
+        // 📥 端末へのデータ書き出し機能 (エクスポート)
+        function exportData() {
+            if (db.length === 0) {
+                alert('保存するデータがありません。');
+                return;
+            }
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
+            const downloadAnchor = document.createElement('a');
+            
+            // ファイル名を生成（例: fitness_backup_2023-10-25.json）
+            const today = new Date().toISOString().split('T')[0];
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `fitness_backup_${today}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        // 📤 端末からのデータ読み込み機能 (インポート)
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    
+                    if (Array.isArray(importedData)) {
+                        if (confirm(`ファイルを読み込みます。既存の記録に上書き・統合してもよろしいですか？`)) {
+                            // 既存データと統合（日付が重複した場合は新データを優先）
+                            importedData.forEach(newLog => {
+                                const index = db.findIndex(item => item.date === newLog.date);
+                                if (index !== -1) {
+                                    db[index] = newLog; // 上書き
+                                } else {
+                                    db.push(newLog); // 追加
+                                }
+                            });
+
+                            // 日付順にソート
+                            db.sort((a, b) => new Date(a.date) - new Date(b.date));
+                            
+                            saveData();
+                            renderAll();
+                            alert('データの読み込みが完了しました！');
+                        }
+                    } else {
+                        alert('正しくないファイル形式です。フィットネスレコーダーのJSONファイルを選択してください。');
+                    }
+                } catch (err) {
+                    alert('ファイルの解析に失敗しました。ファイルが破損している可能性があります。');
+                }
+            };
+            reader.readAsText(file);
+            // 同じファイルを連続で選択してもイベントが走るようにリセット
+            event.target.value = '';
         }
     </script>
 </body>
