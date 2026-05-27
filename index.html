@@ -3,150 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Fitness Recorder</title>
+    <title>Myフィットネスレコーダー Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        /* より洗練されたフォントと背景の空気感のための微調整 */
-        body { background-color: #f8fafc; }
-    </style>
 </head>
-<body class="text-slate-800 font-sans min-h-screen pb-12 antialiased">
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen pb-12">
 
-    <header class="bg-white/80 backdrop-blur-md border-b border-slate-100 sticky top-0 z-50 shadow-sm">
-        <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-            <h1 class="text-xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2">
-                My Fitness Recorder
-            </h1>
+    <header class="bg-blue-600 text-white shadow-md p-4 mb-6">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold tracking-wider">🏋️‍♂️ Myフィットネスレコーダー</h1>
+            <span class="text-sm bg-blue-700 px-3 py-1 rounded-full">1年で10kg減量ターゲット</span>
         </div>
     </header>
 
-    <main class="max-w-4xl mx-auto px-4 mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+    <main class="max-w-5xl mx-auto px-4 space-y-6">
         
-        <div class="space-y-6">
-            
-            <section class="bg-gradient-to-tr from-cyan-500 to-emerald-500 text-white p-6 rounded-2xl shadow-sm shadow-emerald-100">
-                <h2 class="text-[11px] font-bold uppercase tracking-wider opacity-90 mb-3">ACTIVITY STREAK</h2>
-                <div class="flex justify-around items-center text-center">
-                    <div>
-                        <span class="block text-xs opacity-85 mb-1">現在の連続</span>
-                        <span class="text-3xl font-black tracking-tight" id="currentStreak">0</span><span class="text-xs font-semibold opacity-90"> 日</span>
-                    </div>
-                    <div class="border-l border-white/20 h-10"></div>
-                    <div>
-                        <span class="block text-xs opacity-85 mb-1">過去最高</span>
-                        <span class="text-3xl font-black tracking-tight" id="maxStreak">0</span><span class="text-xs font-semibold opacity-90"> 日</span>
-                    </div>
-                </div>
-                <div class="mt-4 text-center text-xs bg-white/15 py-1.5 px-2 rounded-xl font-medium backdrop-blur-sm" id="streakMessage">
-                    今日もお疲れ様です！記録をつけましょう！
-                </div>
-            </section>
+        <div class="bg-gradient-to-r from-emerald-500 to-teal-600 p-6 rounded-xl shadow-md text-white grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+            <div>
+                <p class="text-xs font-bold opacity-80">10kg減に必要な総消費</p>
+                <p class="text-2xl font-black mt-1">72,000 <span class="text-sm font-normal">kcal</span></p>
+            </div>
+            <div class="border-y md:border-y-0 md:border-x border-white/20 py-2 md:py-0">
+                <p class="text-xs font-bold opacity-80">これまでの累計カロリー貯金</p>
+                <p class="text-3xl font-black mt-1" id="totalSavings">0 <span class="text-sm font-normal">kcal</span></p>
+            </div>
+            <div>
+                <p class="text-xs font-bold opacity-80">10kg達成までの進捗度</p>
+                <p class="text-2xl font-black mt-1" id="progressPercent">0.0 <span class="text-sm font-normal">%</span></p>
+            </div>
+        </div>
 
-            <section class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm shadow-slate-100/50">
-                <h2 class="text-base font-bold mb-4 text-slate-800 flex items-center gap-1.5">
-                    <span class="w-1 h-4 bg-cyan-500 rounded-full"></span>今日の記録
-                </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <section class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 h-fit">
+                <h2 class="text-lg font-bold mb-4 text-slate-700 border-b pb-2">今日の記録</h2>
                 <form id="logForm" class="space-y-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">日付</label>
-                        <input type="date" id="dateInput" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:bg-white focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none transition">
+                        <label class="block text-xs font-bold text-slate-500 mb-1">日付</label>
+                        <input type="date" id="dateInput" required class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
+                    
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">腕立て伏せ (回)</label>
+                            <input type="number" id="pushupsInput" min="0" placeholder="20" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">有酸素運動 (分)</label>
+                            <input type="number" id="cardioInput" min="0" placeholder="10" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                    </div>
+
                     <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">腕立て伏せ (回)</label>
-                        <input type="number" id="pushupsInput" min="0" placeholder="0" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:bg-white focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none transition">
+                        <label class="block text-xs font-bold text-slate-500 mb-1">歩数 (目標: 7,000歩)</label>
+                        <input type="number" id="stepsInput" min="0" placeholder="4000" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
+
                     <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">有酸素運動 (分)</label>
-                        <input type="number" id="cardioInput" min="0" placeholder="0" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:bg-white focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 outline-none transition">
+                        <label class="block text-xs font-bold text-slate-500 mb-1">昨晩の晩酌</label>
+                        <select id="alcoholInput" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                            <option value="none">❌ 飲まなかった（休肝日🔥）</option>
+                            <option value="social">🤝 付き合い（セーフ👍）</option>
+                            <option value="home">🍺 家で飲んだ</option>
+                        </select>
                     </div>
-                    <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl transition duration-200 shadow-sm tracking-wide text-sm mt-2">
+
+                    <div class="flex items-center pt-2">
+                        <input type="checkbox" id="pilatesInput" class="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500">
+                        <label for="pilatesInput" class="ml-2 text-sm font-bold text-slate-600">🧘 マシンピラティスに行った</label>
+                    </div>
+
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition duration-200 shadow-md">
                         記録を保存する
                     </button>
                 </form>
             </section>
 
-            <section class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm shadow-slate-100/50">
-                <h2 class="text-xs font-bold mb-3 text-slate-400 uppercase tracking-wider">Data Backup</h2>
-                <div class="grid grid-cols-2 gap-2">
-                    <button onclick="exportToText()" class="bg-slate-50 hover:bg-slate-100 text-slate-600 text-xs font-semibold py-2.5 rounded-xl transition border border-slate-200/60 text-center">
-                        📥 テキスト保存
-                    </button>
-                    <label class="bg-slate-50 hover:bg-slate-100 text-slate-600 text-xs font-semibold py-2.5 rounded-xl transition border border-slate-200/60 text-center cursor-pointer block">
-                        📤 データ復元
-                        <input type="file" id="importFile" accept=".txt" class="hidden" onchange="importFromText(event)">
-                    </label>
+            <section class="md:col-span-2 space-y-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <h2 class="text-lg font-bold mb-4 text-slate-700">トレーニング・歩数の推移</h2>
+                    <div class="relative w-full h-64">
+                        <canvas id="workoutChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <h2 class="text-lg font-bold mb-3 text-slate-700">過去の履歴</h2>
+                    <div class="overflow-x-auto max-h-60 overflow-y-auto">
+                        <table class="w-full text-left text-sm text-slate-600">
+                            <thead class="bg-slate-100 text-xs text-slate-700 uppercase sticky top-0">
+                                <tr>
+                                    <th class="p-3">日付</th>
+                                    <th class="p-3">運動・歩数</th>
+                                    <th class="p-3">晩酌</th>
+                                    <th class="p-3">ピラティス</th>
+                                    <th class="p-3 text-emerald-600 font-bold">貯金</th>
+                                    <th class="p-3 text-center">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyTableBody">
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </section>
         </div>
-
-        <section class="md:col-span-2 space-y-6">
-            <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm shadow-slate-100/50">
-                <h2 class="text-base font-bold mb-4 text-slate-800 flex items-center gap-1.5">
-                    <span class="w-1 h-4 bg-cyan-500 rounded-full"></span>トレーニングの推移
-                </h2>
-                <div class="relative w-full h-64">
-                    <canvas id="workoutChart"></canvas>
-                </div>
-            </div>
-
-            <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm shadow-slate-100/50">
-                <h2 class="text-base font-bold mb-3 text-slate-800 flex items-center gap-1.5">
-                    <span class="w-1 h-4 bg-cyan-500 rounded-full"></span>過去の履歴
-                </h2>
-                <div class="overflow-x-auto max-h-60 overflow-y-auto rounded-xl border border-slate-100">
-                    <table class="w-full text-left text-sm text-slate-600">
-                        <thead class="bg-slate-50 text-xs text-slate-400 uppercase sticky top-0 border-b border-slate-100">
-                            <tr>
-                                <th class="p-3.5 font-semibold">日付</th>
-                                <th class="p-3.5 font-semibold">腕立て (回)</th>
-                                <th class="p-3.5 font-semibold">有酸素 (分)</th>
-                                <th class="p-3.5 font-semibold text-center">操作</th>
-                            </tr>
-                        </thead>
-                        <tbody id="historyTableBody" class="divide-y divide-slate-50">
-                            </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
     </main>
 
     <script>
         let db = JSON.parse(localStorage.getItem('workoutLogs')) || [];
         let myChart = null;
 
-        function formatDate(date) {
-            const y = date.getFullYear();
-            const m = String(date.getMonth() + 1).padStart(2, '0');
-            const d = String(date.getDate()).padStart(2, '0');
-            return `${y}-${m}-${d}`;
+        // カロリー計算ロジック
+        function calculateSavings(item) {
+            let savings = 0;
+            // 1. 晩酌コントロール（家飲みしなかったら+400kcalのおつまみ・酒代カット）
+            if (item.alcohol === 'none' || item.alcohol === 'social') {
+                savings += 400;
+            }
+            // 2. 歩数（7000歩以上で追加消費約120kcal）
+            if (item.steps >= 7000) {
+                savings += 120;
+            }
+            // 3. ピラティス（1回約200kcal）
+            if (item.pilates) {
+                savings += 200;
+            }
+            // 4. きんに君動画＆腕立て（ベース消費 約60kcal）
+            if (item.cardio > 0 || item.pushups > 0) {
+                savings += 60;
+            }
+            return savings;
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('dateInput').value = formatDate(new Date());
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('dateInput').value = today;
             renderAll();
         });
 
         document.getElementById('logForm').addEventListener('submit', (e) => {
             e.preventDefault();
+            
             const date = document.getElementById('dateInput').value;
             const pushups = parseInt(document.getElementById('pushupsInput').value) || 0;
             const cardio = parseInt(document.getElementById('cardioInput').value) || 0;
+            const steps = parseInt(document.getElementById('stepsInput').value) || 0;
+            const alcohol = document.getElementById('alcoholInput').value;
+            const pilates = document.getElementById('pilatesInput').checked;
+
+            const logData = { date, pushups, cardio, steps, alcohol, pilates };
 
             const existingIndex = db.findIndex(item => item.date === date);
             if (existingIndex !== -1) {
-                db[existingIndex] = { date, pushups, cardio };
+                db[existingIndex] = logData;
             } else {
-                db.push({ date, pushups, cardio });
+                db.push(logData);
             }
 
             db.sort((a, b) => new Date(a.date) - new Date(b.date));
+
             saveData();
             renderAll();
 
+            // フォームクリア（日付・晩酌設定以外）
             document.getElementById('pushupsInput').value = '';
             document.getElementById('cardioInput').value = '';
+            document.getElementById('stepsInput').value = '';
+            document.getElementById('pilatesInput').checked = false;
         });
 
         function deleteLog(date) {
@@ -162,88 +185,52 @@
         }
 
         function renderAll() {
-            renderStreaks();
+            updateDashboard();
             renderTable();
             renderChart();
         }
 
-        function renderStreaks() {
-            if (db.length === 0) {
-                document.getElementById('currentStreak').innerText = '0';
-                document.getElementById('maxStreak').innerText = '0';
-                document.getElementById('streakMessage').innerText = '最初の1歩を踏み出しましょう！';
-                return;
-            }
-
-            const dates = [...new Set(db.map(item => item.date))].sort();
-            const todayStr = formatDate(new Date());
-            const yesterdayObj = new Date();
-            yesterdayObj.setDate(yesterdayObj.getDate() - 1);
-            const yesterdayStr = formatDate(yesterdayObj);
-
-            let maxStreak = 0;
-            let currentTemp = 0;
-            let prevDateObj = null;
-
-            for (const dStr of dates) {
-                const dObj = new Date(dStr);
-                if (prevDateObj === null) {
-                    currentTemp = 1;
-                } else {
-                    const diffTime = dObj - prevDateObj;
-                    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-                    if (diffDays === 1) {
-                        currentTemp++;
-                    } else if (diffDays > 1) {
-                        if (currentTemp > maxStreak) maxStreak = currentTemp;
-                        currentTemp = 1;
-                    }
-                }
-                prevDateObj = dObj;
-            }
-            if (currentTemp > maxStreak) maxStreak = currentTemp;
-
-            let currentStreak = 0;
-            const lastDateStr = dates[dates.length - 1];
-
-            if (lastDateStr === todayStr || lastDateStr === yesterdayStr) {
-                let checkObj = new Date(lastDateStr);
-                while (true) {
-                    const checkStr = formatDate(checkObj);
-                    if (dates.includes(checkStr)) {
-                        currentStreak++;
-                        checkObj.setDate(checkObj.getDate() - 1);
-                    } else {
-                        break;
-                    }
-                }
-            }
-
-            document.getElementById('currentStreak').innerText = currentStreak;
-            document.getElementById('maxStreak').innerText = maxStreak;
-
-            const msgArea = document.getElementById('streakMessage');
-            if (lastDateStr === todayStr) {
-                msgArea.innerText = `✨ 今日の記録完了！現在 ${currentStreak}日連続です`;
-            } else if (lastDateStr === yesterdayStr) {
-                msgArea.innerText = `⚡️ 昨日まで継続中！今日の記録もお待ちしています`;
-            } else {
-                msgArea.innerText = `今日からまた新しいスタートを切りましょう！`;
-            }
+        // ダッシュボード（累計カロリー）の更新
+        function updateDashboard() {
+            let total = 0;
+            db.forEach(item => {
+                total += calculateSavings(item);
+            });
+            
+            document.getElementById('totalSavings').innerHTML = `${total.toLocaleString()} <span class="text-sm font-normal">kcal</span>`;
+            
+            // 進捗率（目標72000kcal）
+            let percent = (total / 72000) * 100;
+            if (percent > 100) percent = 100;
+            document.getElementById('progressPercent').innerHTML = `${percent.toFixed(1)} <span class="text-sm font-normal">%</span>`;
         }
 
         function renderTable() {
             const tbody = document.getElementById('historyTableBody');
             tbody.innerHTML = '';
+
             [...db].reverse().forEach(item => {
                 const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-50/80 transition-colors';
+                tr.className = 'border-b hover:bg-slate-50';
+
+                // 晩酌の表示変換
+                let alcoholText = '🍺 家飲み';
+                if (item.alcohol === 'none') alcoholText = '🔥 休肝日';
+                if (item.alcohol === 'social') alcoholText = '🤝 付き合い';
+
+                const savings = calculateSavings(item);
+
                 tr.innerHTML = `
-                    <td class="p-3.5 font-medium text-slate-700">${item.date}</td>
-                    <td class="p-3.5 text-cyan-600 font-bold">${item.pushups} 回</td>
-                    <td class="p-3.5 text-emerald-600 font-bold">${item.cardio} 分</td>
-                    <td class="p-3.5 text-center">
-                        <button onclick="deleteLog('${item.date}')" class="text-slate-400 hover:text-red-500 text-xs font-semibold px-2 py-1 rounded-lg hover:bg-red-50 transition">削除</button>
+                    <td class="p-3 font-medium text-xs md:text-sm">${item.date}</td>
+                    <td class="p-3 text-xs">
+                        <div>💪 腕立て: ${item.pushups || 0}回 / 🏃‍♂️ 有酸素: ${item.cardio || 0}分</div>
+                        <div class="text-slate-400 mt-0.5">🐾 歩数: ${(item.steps || 0).toLocaleString()}歩</div>
+                    </td>
+                    <td class="p-3 text-xs font-bold">${alcoholText}</td>
+                    <td class="p-3 text-xs">${item.pilates ? '🧘 済' : 'ー'}</td>
+                    <td class="p-3 text-emerald-600 font-bold text-sm">+${savings} kcal</td>
+                    <td class="p-3 text-center">
+                        <button onclick="deleteLog('${item.date}')" class="text-red-500 hover:text-red-700 text-xs font-bold px-2 py-1 rounded hover:bg-red-50">削除</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -252,74 +239,62 @@
 
         function renderChart() {
             const ctx = document.getElementById('workoutChart').getContext('2d');
+            
             const labels = db.map(item => item.date);
-            const pushupsData = db.map(item => item.pushups);
             const cardioData = db.map(item => item.cardio);
+            const stepsData = db.map(item => item.steps);
 
-            if (myChart) { myChart.destroy(); }
+            if (myChart) {
+                myChart.destroy();
+            }
 
             myChart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
                     datasets: [
-                        { label: '腕立て伏せ (回)', data: pushupsData, borderColor: '#0ea5e9', backgroundColor: 'rgba(14, 165, 233, 0.05)', yAxisID: 'yPushups', tension: 0.2, borderWidth: 3, fill: true },
-                        { label: '有酸素運動 (分)', data: cardioData, borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.05)', yAxisID: 'yCardio', tension: 0.2, borderWidth: 3, fill: true }
+                        {
+                            label: '有酸素運動 (分)',
+                            data: cardioData,
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            yAxisID: 'yCardio',
+                            tension: 0.2,
+                            borderWidth: 3
+                        },
+                        {
+                            label: '歩数 (歩)',
+                            data: stepsData,
+                            borderColor: '#6366f1',
+                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                            yAxisID: 'ySteps',
+                            tension: 0.2,
+                            borderWidth: 3,
+                            type: 'bar' // 歩数はバー（棒グラフ）にして重ねると見やすくなります
+                        }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { labels: { boxWidth: 12, font: { size: 11, weight: 'bold' } } }
-                    },
                     scales: {
-                        x: { grid: { display: false }, ticks: { font: { size: 10 } } },
-                        yPushups: { type: 'linear', position: 'left', title: { display: true, text: '腕立て (回)', font: { size: 10, weight: 'bold' } }, min: 0, ticks: { font: { size: 10 } } },
-                        yCardio: { type: 'linear', position: 'right', title: { display: true, text: '有酸素 (分)', font: { size: 10, weight: 'bold' } }, min: 0, grid: { drawOnChartArea: false }, ticks: { font: { size: 10 } } }
+                        x: { grid: { display: false } },
+                        yCardio: {
+                            type: 'linear',
+                            position: 'left',
+                            title: { display: true, text: '有酸素 (分)' },
+                            min: 0
+                        },
+                        ySteps: {
+                            type: 'linear',
+                            position: 'right',
+                            title: { display: true, text: '歩数 (歩)' },
+                            min: 0,
+                            grid: { drawOnChartArea: false }
+                        }
                     }
                 }
             });
-        }
-
-        // バックアップ機能
-        function exportToText() {
-            if (db.length === 0) { alert('保存するデータがありません。'); return; }
-            const dataStr = JSON.stringify(db, null, 2);
-            const blob = new Blob([dataStr], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `workout_data_${formatDate(new Date())}.txt`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
-
-        function importFromText(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const importedData = JSON.parse(e.target.result);
-                    if (Array.isArray(importedData)) {
-                        if (confirm('データを読み込みますか？既存のデータに統合・上書きされます。')) {
-                            importedData.forEach(newItem => {
-                                const idx = db.findIndex(item => item.date === newItem.date);
-                                if (idx !== -1) { db[idx] = newItem; } else { db.push(newItem); }
-                            });
-                            db.sort((a, b) => new Date(a.date) - new Date(b.date));
-                            saveData();
-                            renderAll();
-                            alert('データの復元が完了しました！');
-                        }
-                    } else { alert('ファイル形式が正しくありません。'); }
-                } catch (err) { alert('ファイルの読み込みに失敗しました。'); }
-            };
-            reader.readAsText(file);
-            event.target.value = '';
         }
     </script>
 </body>
