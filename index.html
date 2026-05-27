@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Myフィットネスレコーダー Pro (強力インポート版)</title>
+    <title>Myフィットネスレコーダー Pro (iOS完全対応版)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -12,7 +12,7 @@
     <header class="bg-blue-600 text-white shadow-md p-4 mb-6">
         <div class="max-w-5xl mx-auto flex justify-between items-center">
             <h1 class="text-xl font-bold tracking-wider">My Fitness Recorder</h1>
-            <span class="text-sm bg-blue-700 px-3 py-1 rounded-full">1年で10kg減量！</span>
+            <span class="text-sm bg-blue-700 px-3 py-1 rounded-full">1年で10kg減量!</span>
         </div>
     </header>
 
@@ -41,7 +41,7 @@
                 </button>
                 <label class="bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 font-bold py-1.5 px-3 rounded-lg cursor-pointer transition duration-150">
                     📤 端末から読み込む
-                    <input type="file" id="importFile" accept=".json" class="hidden" onchange="importData(event)">
+                    <input type="file" id="importFile" accept=".json,.txt" class="hidden" onchange="importData(event)">
                 </label>
             </div>
         </div>
@@ -123,27 +123,31 @@
     </main>
 
     <script>
-        let db = JSON.parse(localStorage.getItem('workoutLogs')) || [];
+        let db = [];
+        try {
+            db = JSON.parse(localStorage.getItem('workoutLogs')) || [];
+        } catch (e) {
+            db = [];
+        }
         let myChart = null;
 
         document.addEventListener('DOMContentLoaded', () => {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('dateInput').value = today;
             
-            // 起動時にデータを完全に最適化して読み込み
             sanitizeDB();
             renderAll();
         });
 
-        // データの安全性を高める（古いデータ構造に初期値を割り当てる）
         function sanitizeDB() {
+            if (!Array.isArray(db)) db = [];
             db = db.map(item => {
                 return {
-                    date: item.date,
+                    date: item.date || new Date().toISOString().split('T')[0],
                     pushups: parseInt(item.pushups) || 0,
                     cardio: parseInt(item.cardio) || 0,
                     steps: item.steps !== undefined ? parseInt(item.steps) : 0,
-                    alcohol: item.alcohol !== undefined ? item.alcohol : 'none', // 旧データはデフォルト「休肝日」として計算
+                    alcohol: item.alcohol !== undefined ? item.alcohol : 'none',
                     pilates: item.pilates !== undefined ? !!item.pilates : false
                 };
             });
@@ -207,7 +211,11 @@
         }
 
         function saveData() {
-            localStorage.setItem('workoutLogs', JSON.stringify(db));
+            try {
+                localStorage.setItem('workoutLogs', JSON.stringify(db));
+            } catch (e) {
+                alert('ブラウザへの保存に失敗しました。シークレットモード等の場合は保存できないことがあります。');
+            }
         }
 
         function renderAll() {
@@ -258,27 +266,143 @@
         }
 
         function renderChart() {
-            const ctx = document.getElementById('workoutChart').getContext('2d');
-            const labels = db.map(item => item.date);
-            const cardioData = db.map(item => item.cardio);
-            const stepsData = db.map(item => item.steps);
+            try {
+                const ctx = document.getElementById('workoutChart').getContext('2d');
+                const labels = db.map(item => item.date);
+                const cardioData = db.map(item => item.cardio);
+                const stepsData = db.map(item => item.steps);
 
-            if (myChart) { myChart.destroy(); }
+                if (myChart) { myChart.destroy(); }
 
-            myChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: '有酸素運動 (分)',
-                            data: cardioData,
-                            borderColor: '#10b981',
-                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                            yAxisID: 'yCardio',
-                            tension: 0.2,
-                            borderWidth: 3
-                        },
-                        {
-                            label: '歩数 (歩)',
-                            data:
+                myChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: '有酸素運動 (分)',
+                                data: cardioData,
+                                borderColor: '#10b981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                yAxisID: 'yCardio',
+                                tension: 0.2,
+                                borderWidth: 3
+                            },
+                            {
+                                label: '歩数 (歩)',
+                                data: stepsData,
+                                borderColor: '#6366f1',
+                                backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                                yAxisID: 'ySteps',
+                                tension: 0.2,
+                                borderWidth: 3,
+                                type: 'bar'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { grid: { display: false } },
+                            yCardio: {
+                                type: 'linear',
+                                position: 'left',
+                                title: { display: true, text: '有酸素 (分)' },
+                                min: 0
+                            },
+                            ySteps: {
+                                type: 'linear',
+                                position: 'right',
+                                title: { display: true, text: '歩数 (歩)' },
+                                min: 0,
+                                grid: { drawOnChartArea: false }
+                            }
+                        }
+                    }
+                });
+            } catch (err) {
+                console.error("Chart rendering error:", err);
+            }
+        }
+
+        // 📥 iOSでも確実に「ファイル」に書き出せるBlob形式のダウンロード処理
+        function exportData() {
+            if (db.length === 0) { alert('保存するデータがありません。'); return; }
+            
+            try {
+                const jsonString = JSON.stringify(db, null, 2);
+                // iOSで弾かれないよう、プレーンテキストのBlob（バイナリ）として生成
+                const blob = new Blob([jsonString], { type: "text/plain;charset=utf-8" });
+                const today = new Date().toISOString().split('T')[0];
+                const fileName = `fitness_backup_${today}.json`;
+
+                // iOS対応のダウンロード用アンカー作成
+                const downloadAnchor = document.createElement('a');
+                const blobUrl = URL.createObjectURL(blob);
+                
+                downloadAnchor.href = blobUrl;
+                downloadAnchor.download = fileName;
+                
+                document.body.appendChild(downloadAnchor);
+                downloadAnchor.click();
+                
+                // 後片付け
+                setTimeout(() => {
+                    document.body.removeChild(downloadAnchor);
+                    URL.revokeObjectURL(blobUrl);
+                }, 100);
+            } catch (e) {
+                alert('ファイルの生成に失敗しました: ' + e.message);
+            }
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    let importedData = JSON.parse(e.target.result);
+                    
+                    if (Array.isArray(importedData)) {
+                        if (confirm(`ファイルを読み込みます。古いデータも自動的に最新形式に変換して統合します。よろしいですか？`)) {
+                            
+                            importedData.forEach(newLog => {
+                                const cleanLog = {
+                                    date: newLog.date || new Date().toISOString().split('T')[0],
+                                    pushups: parseInt(newLog.pushups) || 0,
+                                    cardio: parseInt(newLog.cardio) || 0,
+                                    steps: newLog.steps !== undefined ? parseInt(newLog.steps) : 0,
+                                    alcohol: newLog.alcohol !== undefined ? newLog.alcohol : 'none',
+                                    pilates: newLog.pilates !== undefined ? !!newLog.pilates : false
+                                };
+
+                                const index = db.findIndex(item => item.date === cleanLog.date);
+                                if (index !== -1) {
+                                    db[index] = cleanLog;
+                                } else {
+                                    db.push(cleanLog);
+                                }
+                            });
+
+                            db.sort((a, b) => new Date(a.date) - new Date(b.date));
+                            
+                            saveData();
+                            renderAll();
+                            alert('データの読み込みと最新版への最適化が完了しました！');
+                        }
+                    } else {
+                        alert('正しくないファイル形式です。JSON配列データを選択してください。');
+                    }
+                } catch (err) {
+                    alert('ファイルの解析に失敗しました。正しいバックアップデータ（テキスト）であることを確認してください。');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+    </script>
+</body>
+</html>
