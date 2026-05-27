@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Fitness Recorder</title>
+    <title>Myフィットネスレコーダー Pro (強力インポート版)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -123,54 +123,62 @@
     </main>
 
     <script>
-        // --- データの初期読み込み (前のバージョンのデータも引き継ぎます) ---
         let db = JSON.parse(localStorage.getItem('workoutLogs')) || [];
         let myChart = null;
 
-        // ページ読み込み時に即座にデータを反映
         document.addEventListener('DOMContentLoaded', () => {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('dateInput').value = today;
             
-            // 初回描画
+            // 起動時にデータを完全に最適化して読み込み
+            sanitizeDB();
             renderAll();
         });
 
-        // カロリー計算ロジック（前のバージョンデータ＝新項目がない場合もエラーにならないよう初期値を設定）
+        // データの安全性を高める（古いデータ構造に初期値を割り当てる）
+        function sanitizeDB() {
+            db = db.map(item => {
+                return {
+                    date: item.date,
+                    pushups: parseInt(item.pushups) || 0,
+                    cardio: parseInt(item.cardio) || 0,
+                    steps: item.steps !== undefined ? parseInt(item.steps) : 0,
+                    alcohol: item.alcohol !== undefined ? item.alcohol : 'none', // 旧データはデフォルト「休肝日」として計算
+                    pilates: item.pilates !== undefined ? !!item.pilates : false
+                };
+            });
+            saveData();
+        }
+
         function calculateSavings(item) {
             let savings = 0;
-            
-            // 1. 晩酌コントロール（設定がない、またはnone, socialなら+400kcal）
-            if (!item.alcohol || item.alcohol === 'none' || item.alcohol === 'social') {
+            if (item.alcohol === 'none' || item.alcohol === 'social') {
                 savings += 400;
             }
-            // 2. 歩数（7000歩以上で追加消費約120kcal）
-            if (item.steps && item.steps >= 7000) {
+            if (item.steps >= 7000) {
                 savings += 120;
             }
-            // 3. ピラティス（1回約200kcal）
             if (item.pilates) {
                 savings += 200;
             }
-            // 4. きんに君動画＆腕立て（ベース消費 約60kcal）
             if (item.cardio > 0 || item.pushups > 0) {
                 savings += 60;
             }
             return savings;
         }
 
-        // フォーム送信時の処理
         document.getElementById('logForm').addEventListener('submit', (e) => {
             e.preventDefault();
             
             const date = document.getElementById('dateInput').value;
-            const pushups = parseInt(document.getElementById('pushupsInput').value) || 0;
-            const cardio = parseInt(document.getElementById('cardioInput').value) || 0;
-            const steps = parseInt(document.getElementById('stepsInput').value) || 0;
-            const alcohol = document.getElementById('alcoholInput').value;
-            const pilates = document.getElementById('pilatesInput').checked;
-
-            const logData = { date, pushups, cardio, steps, alcohol, pilates };
+            const logData = {
+                date: date,
+                pushups: parseInt(document.getElementById('pushupsInput').value) || 0,
+                cardio: parseInt(document.getElementById('cardioInput').value) || 0,
+                steps: parseInt(document.getElementById('stepsInput').value) || 0,
+                alcohol: document.getElementById('alcoholInput').value,
+                pilates: document.getElementById('pilatesInput').checked
+            };
 
             const existingIndex = db.findIndex(item => item.date === date);
             if (existingIndex !== -1) {
@@ -184,14 +192,12 @@
             saveData();
             renderAll();
 
-            // フォームクリア
             document.getElementById('pushupsInput').value = '';
             document.getElementById('cardioInput').value = '';
             document.getElementById('stepsInput').value = '';
             document.getElementById('pilatesInput').checked = false;
         });
 
-        // データの削除
         function deleteLog(date) {
             if (confirm(`${date} の記録を削除しますか？`)) {
                 db = db.filter(item => item.date !== date);
@@ -200,25 +206,19 @@
             }
         }
 
-        // LocalStorageへの保存
         function saveData() {
             localStorage.setItem('workoutLogs', JSON.stringify(db));
         }
 
-        // 画面全体の更新
         function renderAll() {
             updateDashboard();
             renderTable();
             renderChart();
         }
 
-        // ダッシュボードの更新
         function updateDashboard() {
             let total = 0;
-            db.forEach(item => {
-                total += calculateSavings(item);
-            });
-            
+            db.forEach(item => { total += calculateSavings(item); });
             document.getElementById('totalSavings').innerHTML = `${total.toLocaleString()} <span class="text-sm font-normal">kcal</span>`;
             
             let percent = (total / 72000) * 100;
@@ -226,7 +226,6 @@
             document.getElementById('progressPercent').innerHTML = `${percent.toFixed(1)} <span class="text-sm font-normal">%</span>`;
         }
 
-        // 過去の履歴テーブル描画
         function renderTable() {
             const tbody = document.getElementById('historyTableBody');
             tbody.innerHTML = '';
@@ -235,20 +234,17 @@
                 const tr = document.createElement('tr');
                 tr.className = 'border-b hover:bg-slate-50';
 
-                // 前のバージョンのデータ（新項目がない場合）の表示補完
                 let alcoholText = '🍺 家飲み';
                 if (item.alcohol === 'none') alcoholText = '🔥 休肝日';
-                if (item.alcohol === 'social') alcoholText = '🤝 付き合い';
-                if (item.alcohol === undefined) alcoholText = 'ー'; // 前のバージョン用
+                if (item.social || item.alcohol === 'social') alcoholText = '🤝 付き合い';
 
-                const stepsText = item.steps !== undefined ? `${(item.steps).toLocaleString()}歩` : 'ー';
                 const savings = calculateSavings(item);
 
                 tr.innerHTML = `
                     <td class="p-3 font-medium text-xs md:text-sm">${item.date}</td>
                     <td class="p-3 text-xs">
-                        <div>💪 腕立て: ${item.pushups || 0}回 / 🏃‍♂️ 有酸素: ${item.cardio || 0}分</div>
-                        <div class="text-slate-400 mt-0.5">🐾 歩数: ${stepsText}</div>
+                        <div>💪 腕立て: ${item.pushups}回 / 🏃‍♂️ 有酸素: ${item.cardio}分</div>
+                        <div class="text-slate-400 mt-0.5">🐾 歩数: ${item.steps.toLocaleString()}歩</div>
                     </td>
                     <td class="p-3 text-xs font-bold">${alcoholText}</td>
                     <td class="p-3 text-xs">${item.pilates ? '🧘 済' : 'ー'}</td>
@@ -261,17 +257,13 @@
             });
         }
 
-        // グラフの描画 (Chart.js)
         function renderChart() {
             const ctx = document.getElementById('workoutChart').getContext('2d');
-            
             const labels = db.map(item => item.date);
             const cardioData = db.map(item => item.cardio);
-            const stepsData = db.map(item => item.steps || 0); // 旧データ用
+            const stepsData = db.map(item => item.steps);
 
-            if (myChart) {
-                myChart.destroy();
-            }
+            if (myChart) { myChart.destroy(); }
 
             myChart = new Chart(ctx, {
                 type: 'line',
@@ -289,97 +281,4 @@
                         },
                         {
                             label: '歩数 (歩)',
-                            data: stepsData,
-                            borderColor: '#6366f1',
-                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                            yAxisID: 'ySteps',
-                            tension: 0.2,
-                            borderWidth: 3,
-                            type: 'bar'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: { grid: { display: false } },
-                        yCardio: {
-                            type: 'linear',
-                            position: 'left',
-                            title: { display: true, text: '有酸素 (分)' },
-                            min: 0
-                        },
-                        ySteps: {
-                            type: 'linear',
-                            position: 'right',
-                            title: { display: true, text: '歩数 (歩)' },
-                            min: 0,
-                            grid: { drawOnChartArea: false }
-                        }
-                    }
-                }
-            });
-        }
-
-        // 📥 端末へのデータ書き出し機能 (エクスポート)
-        function exportData() {
-            if (db.length === 0) {
-                alert('保存するデータがありません。');
-                return;
-            }
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
-            const downloadAnchor = document.createElement('a');
-            
-            // ファイル名を生成（例: fitness_backup_2023-10-25.json）
-            const today = new Date().toISOString().split('T')[0];
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `fitness_backup_${today}.json`);
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-        }
-
-        // 📤 端末からのデータ読み込み機能 (インポート)
-        function importData(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const importedData = JSON.parse(e.target.result);
-                    
-                    if (Array.isArray(importedData)) {
-                        if (confirm(`ファイルを読み込みます。既存の記録に上書き・統合してもよろしいですか？`)) {
-                            // 既存データと統合（日付が重複した場合は新データを優先）
-                            importedData.forEach(newLog => {
-                                const index = db.findIndex(item => item.date === newLog.date);
-                                if (index !== -1) {
-                                    db[index] = newLog; // 上書き
-                                } else {
-                                    db.push(newLog); // 追加
-                                }
-                            });
-
-                            // 日付順にソート
-                            db.sort((a, b) => new Date(a.date) - new Date(b.date));
-                            
-                            saveData();
-                            renderAll();
-                            alert('データの読み込みが完了しました！');
-                        }
-                    } else {
-                        alert('正しくないファイル形式です。フィットネスレコーダーのJSONファイルを選択してください。');
-                    }
-                } catch (err) {
-                    alert('ファイルの解析に失敗しました。ファイルが破損している可能性があります。');
-                }
-            };
-            reader.readAsText(file);
-            // 同じファイルを連続で選択してもイベントが走るようにリセット
-            event.target.value = '';
-        }
-    </script>
-</body>
-</html>
+                            data:
